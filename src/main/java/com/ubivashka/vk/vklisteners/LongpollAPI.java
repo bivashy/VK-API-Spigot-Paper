@@ -14,7 +14,7 @@ import com.vk.api.sdk.objects.groups.responses.GetLongPollServerResponse;
 
 public class LongpollAPI {
 	private VKAPI plugin;
-	private Integer ts;
+	private String ts;
 	private GetLongPollServerResponse longserver;
 
 	public LongpollAPI(VKAPI plugin) {
@@ -26,7 +26,7 @@ public class LongpollAPI {
 			e.printStackTrace();
 			return;
 		}
-		ts = Integer.parseInt(longserver.getTs());
+		ts = longserver.getTs();
 		startEventListener();
 	}
 
