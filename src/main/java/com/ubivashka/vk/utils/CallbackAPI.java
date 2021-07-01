@@ -13,7 +13,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.ubivashka.vk.VKAPI;
-import com.ubivashka.vk.callback.objects.MessageTyping;
 import com.ubivashka.vk.events.VKAudioNewEvent;
 import com.ubivashka.vk.events.VKBoardDeleteEvent;
 import com.ubivashka.vk.events.VKBoardEditEvent;
@@ -32,7 +31,6 @@ import com.ubivashka.vk.events.VKMessageAllowEvent;
 import com.ubivashka.vk.events.VKMessageDenyEvent;
 import com.ubivashka.vk.events.VKMessageEditEvent;
 import com.ubivashka.vk.events.VKMessageReplyEvent;
-import com.ubivashka.vk.events.VKMessageTypingEvent;
 import com.ubivashka.vk.events.VKPhotoCommentDeleteEvent;
 import com.ubivashka.vk.events.VKPhotoCommentEditEvent;
 import com.ubivashka.vk.events.VKPhotoCommentEvent;
@@ -90,7 +88,6 @@ public class CallbackAPI {
 	private static final String CALLBACK_EVENT_MESSAGE_REPLY = "message_reply";
 	private static final String CALLBACK_EVENT_MESSAGE_ALLOW = "message_allow";
 	private static final String CALLBACK_EVENT_MESSAGE_DENY = "message_deny";
-	private static final String CALLBACK_EVENT_MESSAGE_TYPING_STATE = "message_typing_state";
 	private static final String CALLBACK_EVENT_MESSAGE_EDIT = "message_edit";
 	private static final String CALLBACK_EVENT_PHOTO_NEW = "photo_new";
 	private static final String CALLBACK_EVENT_PHOTO_COMMENT_NEW = "photo_comment_new";
@@ -141,8 +138,6 @@ public class CallbackAPI {
 		types.put(CALLBACK_EVENT_MESSAGE_ALLOW, new TypeToken<CallbackMessage<MessageAllow>>() {
 		}.getType());
 		types.put(CALLBACK_EVENT_MESSAGE_DENY, new TypeToken<CallbackMessage<MessageDeny>>() {
-		}.getType());
-		types.put(CALLBACK_EVENT_MESSAGE_TYPING_STATE, new TypeToken<CallbackMessage<MessageTyping>>() {
 		}.getType());
 
 		types.put(CALLBACK_EVENT_PHOTO_NEW, new TypeToken<CallbackMessage<Photo>>() {
@@ -283,15 +278,6 @@ public class CallbackAPI {
 		messageDeny(groupId, messageDeny);
 	}
 
-	public void messageTyping(Integer groupId, MessageTyping messageTyping) {
-		VKMessageTypingEvent typingEvent = new VKMessageTypingEvent(messageTyping);
-		Bukkit.getPluginManager().callEvent(typingEvent);
-	}
-	
-	public void messageTyping(Integer groupId, String secret, MessageTyping messageTyping) {
-		messageTyping(groupId,messageTyping);
-	}
-	
 	public void photoNew(Integer groupId, Photo photo) {
 		VKPhotoNewEvent newPhotoEvent = new VKPhotoNewEvent(photo);
 		Bukkit.getPluginManager().callEvent(newPhotoEvent);
@@ -630,7 +616,7 @@ public class CallbackAPI {
 
 		Type typeOfClass = CALLBACK_TYPES.get(type);
 		if (typeOfClass == null) {
-			LOG.warn("Unsupported callback event: "+type, type);
+			LOG.warn("Unsupported callback event", type);
 			return false;
 		}
 
@@ -652,15 +638,11 @@ public class CallbackAPI {
 		case CALLBACK_EVENT_MESSAGE_ALLOW:
 			messageAllow(message.getGroupId(), message.getSecret(), (MessageAllow) message.getObject());
 			break;
-			
+
 		case CALLBACK_EVENT_MESSAGE_DENY:
 			messageDeny(message.getGroupId(), message.getSecret(), (MessageDeny) message.getObject());
 			break;
-			
-		case CALLBACK_EVENT_MESSAGE_TYPING_STATE:
-			messageTyping(message.getGroupId(),message.getSecret(),(MessageTyping)message.getObject());
-			break;
-			
+
 		case CALLBACK_EVENT_PHOTO_NEW:
 			photoNew(message.getGroupId(), message.getSecret(), (Photo) message.getObject());
 			break;
@@ -727,14 +709,14 @@ public class CallbackAPI {
 		case CALLBACK_EVENT_WALL_REPLY_DELETE:
 			wallReplyDelete(message.getGroupId(), message.getSecret(), (WallCommentDelete) message.getObject());
 			break;
-
+			
 		case CALLBACK_EVENT_LIKE_ADD:
-			likeAdd(message.getGroupId(), message.getSecret(), (LikeAddRemove) message.getObject());
+			likeAdd(message.getGroupId(),message.getSecret(),(LikeAddRemove) message.getObject());
 			break;
 		case CALLBACK_EVENT_LIKE_REMOVE:
-			likeRemove(message.getGroupId(), message.getSecret(), (LikeAddRemove) message.getObject());
+			likeRemove(message.getGroupId(),message.getSecret(),(LikeAddRemove) message.getObject());
 			break;
-
+			
 		case CALLBACK_EVENT_BOARD_POST_NEW:
 			boardPostNew(message.getGroupId(), message.getSecret(), (TopicComment) message.getObject());
 			break;
