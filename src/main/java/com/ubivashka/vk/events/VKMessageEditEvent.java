@@ -1,6 +1,5 @@
 package com.ubivashka.vk.events;
 
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
