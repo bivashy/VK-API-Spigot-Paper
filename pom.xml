@@ -11,7 +11,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
-	<name>VKMavenBot</name>
+	<name>VKAPI</name>
 	<repositories>
 		<repository>
 			<id>spigot-repo</id>
@@ -32,9 +32,9 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.14.1</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -43,8 +43,6 @@
 			<version>4.5.13</version>
 			<scope>compile</scope>
 		</dependency>
-
-
 
 	</dependencies>
 	<build>
