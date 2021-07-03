@@ -13,12 +13,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.ubivashka.vk.VKAPI;
+import com.ubivashka.vk.callback.objects.CallbackButtonEvent;
 import com.ubivashka.vk.callback.objects.MessageTyping;
 import com.ubivashka.vk.events.VKAudioNewEvent;
 import com.ubivashka.vk.events.VKBoardDeleteEvent;
 import com.ubivashka.vk.events.VKBoardEditEvent;
 import com.ubivashka.vk.events.VKBoardNewEvent;
 import com.ubivashka.vk.events.VKBoardRestoreEvent;
+import com.ubivashka.vk.events.VKCallbackButtonPressEvent;
 import com.ubivashka.vk.events.VKGroupChangePhotoEvent;
 import com.ubivashka.vk.events.VKGroupChangeSettingsEvent;
 import com.ubivashka.vk.events.VKGroupOfficersEditEvent;
@@ -92,6 +94,7 @@ public class CallbackAPI {
 	private static final String CALLBACK_EVENT_MESSAGE_DENY = "message_deny";
 	private static final String CALLBACK_EVENT_MESSAGE_TYPING_STATE = "message_typing_state";
 	private static final String CALLBACK_EVENT_MESSAGE_EDIT = "message_edit";
+	private static final String CALLBACK_EVENT_MESSAGE_EVENT = "message_event";
 	private static final String CALLBACK_EVENT_PHOTO_NEW = "photo_new";
 	private static final String CALLBACK_EVENT_PHOTO_COMMENT_NEW = "photo_comment_new";
 	private static final String CALLBACK_EVENT_PHOTO_COMMENT_EDIT = "photo_comment_edit";
@@ -143,6 +146,8 @@ public class CallbackAPI {
 		types.put(CALLBACK_EVENT_MESSAGE_DENY, new TypeToken<CallbackMessage<MessageDeny>>() {
 		}.getType());
 		types.put(CALLBACK_EVENT_MESSAGE_TYPING_STATE, new TypeToken<CallbackMessage<MessageTyping>>() {
+		}.getType());
+		types.put(CALLBACK_EVENT_MESSAGE_EVENT, new TypeToken<CallbackMessage<CallbackButtonEvent>>() {
 		}.getType());
 
 		types.put(CALLBACK_EVENT_PHOTO_NEW, new TypeToken<CallbackMessage<Photo>>() {
@@ -287,11 +292,20 @@ public class CallbackAPI {
 		VKMessageTypingEvent typingEvent = new VKMessageTypingEvent(messageTyping);
 		Bukkit.getPluginManager().callEvent(typingEvent);
 	}
-	
+
 	public void messageTyping(Integer groupId, String secret, MessageTyping messageTyping) {
-		messageTyping(groupId,messageTyping);
+		messageTyping(groupId, messageTyping);
 	}
-	
+
+	public void messageEvent(Integer groupId, CallbackButtonEvent buttonEvent) {
+		VKCallbackButtonPressEvent buttonPressEvent = new VKCallbackButtonPressEvent(buttonEvent);
+		Bukkit.getPluginManager().callEvent(buttonPressEvent);
+	}
+
+	public void messageEvent(Integer groupId, String secret, CallbackButtonEvent buttonEvent) {
+		messageEvent(groupId, buttonEvent);
+	}
+
 	public void photoNew(Integer groupId, Photo photo) {
 		VKPhotoNewEvent newPhotoEvent = new VKPhotoNewEvent(photo);
 		Bukkit.getPluginManager().callEvent(newPhotoEvent);
@@ -630,7 +644,7 @@ public class CallbackAPI {
 
 		Type typeOfClass = CALLBACK_TYPES.get(type);
 		if (typeOfClass == null) {
-			LOG.warn("Unsupported callback event: "+type, type);
+			LOG.warn("Unsupported callback event: " + type, type);
 			return false;
 		}
 
@@ -652,15 +666,16 @@ public class CallbackAPI {
 		case CALLBACK_EVENT_MESSAGE_ALLOW:
 			messageAllow(message.getGroupId(), message.getSecret(), (MessageAllow) message.getObject());
 			break;
-			
+
 		case CALLBACK_EVENT_MESSAGE_DENY:
 			messageDeny(message.getGroupId(), message.getSecret(), (MessageDeny) message.getObject());
 			break;
-			
 		case CALLBACK_EVENT_MESSAGE_TYPING_STATE:
-			messageTyping(message.getGroupId(),message.getSecret(),(MessageTyping)message.getObject());
+			messageTyping(message.getGroupId(), message.getSecret(), (MessageTyping) message.getObject());
 			break;
-			
+		case CALLBACK_EVENT_MESSAGE_EVENT:
+			messageEvent(message.getGroupId(), message.getSecret(), (CallbackButtonEvent) message.getObject());
+			break;
 		case CALLBACK_EVENT_PHOTO_NEW:
 			photoNew(message.getGroupId(), message.getSecret(), (Photo) message.getObject());
 			break;
