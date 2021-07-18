@@ -9,6 +9,7 @@ import com.ubivashka.vk.VKAPI;
 import com.ubivashka.vk.events.VKJsonEvent;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
+import com.vk.api.sdk.exceptions.LongPollServerKeyExpiredException;
 import com.vk.api.sdk.objects.callback.longpoll.responses.GetLongPollEventsResponse;
 import com.vk.api.sdk.objects.groups.responses.GetLongPollServerResponse;
 
@@ -19,13 +20,7 @@ public class LongpollAPI {
 
 	public LongpollAPI(VKAPI plugin) {
 		this.plugin = plugin;
-		try {
-			longserver = plugin.vk.groupsLongPoll().getLongPollServer(plugin.actor, plugin.actor.getGroupId())
-					.execute();
-		} catch (ApiException | ClientException e) {
-			e.printStackTrace();
-			return;
-		}
+		updateKey();
 		ts = longserver.getTs();
 		startEventListener();
 	}
@@ -41,14 +36,17 @@ public class LongpollAPI {
 					for (JsonObject json : events.getUpdates()) {
 						callEvent(json);
 					}
-					ts=events.getTs();
+					ts = events.getTs();
+				} catch (LongPollServerKeyExpiredException e) {
+					updateKey();
 				} catch (NumberFormatException | ApiException | ClientException e) {
-					e.printStackTrace();	
+					e.printStackTrace();
 					cancel();
 				}
 			}
 		}.runTaskTimerAsynchronously(plugin, 0, plugin.getConfig().getInt("settings.delay"));
 	}
+
 	private void callEvent(JsonObject json) {
 		new BukkitRunnable() {
 			@Override
@@ -57,6 +55,16 @@ public class LongpollAPI {
 				Bukkit.getPluginManager().callEvent(jsonEvent);
 				plugin.callbackAPI.parse(json);
 			}
-		}.runTaskLater(plugin,1);
+		}.runTaskLater(plugin, 1);
+	}
+
+	private void updateKey() {
+		try {
+			this.longserver = (GetLongPollServerResponse) plugin.vk.groupsLongPoll()
+					.getLongPollServer(plugin.actor, plugin.actor.getGroupId().intValue()).execute();
+		} catch (ApiException | com.vk.api.sdk.exceptions.ClientException e) {
+			e.printStackTrace();
+			return;
+		}
 	}
 }
